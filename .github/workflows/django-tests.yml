@@ -58,11 +58,11 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         REDIS_URL: ${{ secrets.REDIS_URL }}
       run: |
-        python manage.py migrate
+        python taxiunn/manage.py migrate
 
     - name: Run tests
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         REDIS_URL: ${{ secrets.REDIS_URL }}
       run: |
-        python manage.py test
+        python taxiunn/manage.py test
