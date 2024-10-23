@@ -34,3 +34,28 @@ class RegisterView(APIView):
                 return Response({'error': 'The email not found.'},
                                 status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ActivateView(APIView):
+    def post(self, request):
+        data = request.data
+        if not "email" in data or not "verification_code" in data:
+            return Response({'error': 'Missing parameters.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        user_data = cache.get(f'user_data_{data["email"]}')
+        code = cache.get(f'verification_code_{data["email"]}')
+
+        if str(code) != data["verification_code"]:
+            return Response({'error': 'Incorrect verification code.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ClientSerializer(data=user_data)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print("here")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'You have successfully registered.'},
+                        status=status.HTTP_200_OK)
+
