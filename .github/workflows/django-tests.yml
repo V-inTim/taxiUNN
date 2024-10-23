@@ -2,9 +2,9 @@ name: Django Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
 
 jobs:
   test:
@@ -18,7 +18,7 @@ jobs:
           POSTGRES_USER: ${{ secrets.DB_USER }}
           POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -62,7 +62,7 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
-        python manage.py migrate
+        python taxiunn/manage.py migrate
 
     - name: Run tests
       env:
@@ -73,4 +73,4 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
-        python manage.py test
+        python taxiunn/manage.py test
