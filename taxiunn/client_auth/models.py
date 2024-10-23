@@ -68,16 +68,3 @@ class Client(AbstractBaseUser):
     def __str__(self):
         """ Строковое представление модели """
         return self.email
-
-    @property
-    def token(self):
-        """ jwt_token """
-        return self._generate_jwt_token()
-
-    def _generate_jwt_token(self):
-        refresh = RefreshToken.for_user(self)
-        token = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-        return token
