@@ -102,7 +102,7 @@ CACHES = {
         'LOCATION': 'redis://localhost:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PASSWORD': env('REDIS_PASSWORD'),  # Если у вас настроен пароль для Redis
+            'PASSWORD': env('REDIS_PASSWORD'),
         }
     }
 }
@@ -119,21 +119,25 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": ("django.contrib.auth.password_validation."
+                 "UserAttributeSimilarityValidator"),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": ("django.contrib.auth.password_validation."
+                 "MinimumLengthValidator"),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": ("django.contrib.auth.password_validation."
+                 "CommonPasswordValidator"),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": ("django.contrib.auth.password_validation."
+                 "NumericPasswordValidator"),
     },
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'client_auth.backends.ClientBackend',  # Ваш собственный бэкенд аутентификации
+    'client_auth.backends.ClientBackend',
 ]
 
 
