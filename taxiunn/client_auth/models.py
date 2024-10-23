@@ -1,5 +1,4 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import models
 
 
