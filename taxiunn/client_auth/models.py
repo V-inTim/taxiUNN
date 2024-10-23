@@ -1,5 +1,4 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import models
 
@@ -8,7 +7,8 @@ class ClientManager(BaseUserManager):
     """
     Django требует, чтобы кастомные пользователи определяли свой собственный
     класс Manager. Унаследовавшись от BaseUserManager, мы получаем много того
-    же самого кода, который Django использовал для создания User (для демонстрации).
+    же самого кода, который Django использовал для создания User
+    (для демонстрации).
     """
 
     def create_user(self, email, password):

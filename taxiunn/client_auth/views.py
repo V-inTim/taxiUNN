@@ -28,7 +28,8 @@ class RegisterView(APIView):
                     [email],
                     fail_silently=False,
                 )
-                return Response({'message': 'Check your email for the verification code.'},
+                return Response({'message': ('Check your email for '
+                                             'the verification code.')},
                                 status=status.HTTP_200_OK)
             except SMTPException:
                 return Response({'error': 'The email not found.'},
@@ -39,7 +40,7 @@ class RegisterView(APIView):
 class ActivateView(APIView):
     def post(self, request):
         data = request.data
-        if not "email" in data or not "verification_code" in data:
+        if "email" not in data or "verification_code" not in data:
             return Response({'error': 'Missing parameters.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -55,7 +56,7 @@ class ActivateView(APIView):
             serializer.save()
         else:
             print("here")
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'You have successfully registered.'},
                         status=status.HTTP_200_OK)
-

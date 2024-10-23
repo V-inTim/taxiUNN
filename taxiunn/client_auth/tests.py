@@ -1,10 +1,7 @@
-from django.core import mail
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.core.cache import cache
-from .models import Client  # Replace with your actual model import
-from .serializers import ClientSerializer  # Replace with your actual serializer import
 
 
 class RegisterViewTests(APITestCase):
@@ -41,7 +38,8 @@ class ActivateViewTests(APITestCase):
         response = self.client.post(url, data, format='json')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], 'You have successfully registered.')
+        self.assertEqual(response.data['message'],
+                         'You have successfully registered.')
 
     def test_activate_invalid_code(self):
         url = reverse('activate')  # Replace with your actual URL name
@@ -52,7 +50,8 @@ class ActivateViewTests(APITestCase):
 
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], 'Incorrect verification code.')
+        self.assertEqual(response.data['error'],
+                         'Incorrect verification code.')
 
     def test_activate_missing_parameters(self):
         url = reverse('activate')  # Replace with your actual URL name
