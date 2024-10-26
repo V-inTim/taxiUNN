@@ -36,7 +36,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --command "redis-server --requirepass ${{ secrets.REDIS_PASSWORD }}"
+          --entrypoint sh -c "redis-server --requirepass ${{ secrets.REDIS_PASSWORD }}"
 
 
 
