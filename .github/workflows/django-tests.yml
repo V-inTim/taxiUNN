@@ -36,7 +36,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --command "redis-server --requirepass my_redis_password"
+          --entrypoint sh -c "redis-server --requirepass my_redis_password"
 
 
 
