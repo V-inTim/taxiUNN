@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: my_database_name
+          POSTGRES_USER: my_database_user
+          POSTGRES_PASSWORD: my_database_password
         ports:
           - 5433:5432
         options: >-
@@ -28,7 +28,7 @@ jobs:
       redis:
         image: redis:latest
         env:
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_PASSWORD: my_redis_password
         ports:
           - 6379:6379
         options: >-
@@ -36,7 +36,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --entrypoint sh -c "redis-server --requirepass ${{ secrets.REDIS_PASSWORD }}"
+          --command "redis-server --requirepass my_redis_password"
 
 
 
@@ -58,10 +58,10 @@ jobs:
 
     - name: Run migrations
       env:
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        DB_NAME: my_database_name
+        DB_USER: my_database_name
+        DB_PASSWORD: my_database_name
+        REDIS_PASSWORD: my_redis_password
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
@@ -70,10 +70,10 @@ jobs:
 
     - name: Run tests
       env:
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        DB_NAME: my_database_name
+        DB_USER: my_database_user
+        DB_PASSWORD: my_database_password
+        REDIS_PASSWORD: my_redis_password
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
