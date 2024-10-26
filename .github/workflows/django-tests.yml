@@ -59,8 +59,8 @@ jobs:
     - name: Run migrations
       env:
         DB_NAME: my_database_name
-        DB_USER: my_database_name
-        DB_PASSWORD: my_database_name
+        DB_USER: my_database_user
+        DB_PASSWORD: my_database_password
         REDIS_PASSWORD: my_redis_password
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
