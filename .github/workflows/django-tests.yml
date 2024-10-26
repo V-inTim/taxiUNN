@@ -62,7 +62,8 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
-        python taxiunn/manage.py migrate
+        cd taxiunn/
+        python manage.py migrate
 
     - name: Run tests
       env:
@@ -73,4 +74,5 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
-        python taxiunn/manage.py test
+        cd taxiunn/
+        python manage.py test
