@@ -3,6 +3,8 @@ from .models import Client
 
 
 class ClientBackend(BaseBackend):
+    """ Используется для управления процессом аутентификации клиентов """
+
     def authenticate(self, request, email=None, password=None, **kwargs):
         try:
             user = Client.objects.get(email=email)

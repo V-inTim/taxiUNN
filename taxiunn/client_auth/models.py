@@ -5,13 +5,11 @@ from django.db import models
 class ClientManager(BaseUserManager):
     """
     Django требует, чтобы кастомные пользователи определяли свой собственный
-    класс Manager. Унаследовавшись от BaseUserManager, мы получаем много того
-    же самого кода, который Django использовал для создания User
-    (для демонстрации).
+    класс Manager. .
     """
 
     def create_user(self, email, password):
-        """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
+        """ Создает и возвращает пользователя с имэйлом, паролем. """
 
         if email is None:
             raise TypeError('Clients must have an email address.')
@@ -26,7 +24,8 @@ class ClientManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password):
-        """ Создает и возввращет пользователя с привилегиями суперадмина. """
+        """ Создает и возвращает пользователя с привилегиями суперадмина. """
+
         if email is None:
             raise TypeError('Clients must have an email address.')
 
@@ -42,6 +41,7 @@ class ClientManager(BaseUserManager):
 
 
 class Client(AbstractBaseUser):
+    """ Класс клиента. """
 
     email = models.EmailField(db_index=True, unique=True)
     full_name = models.CharField(null=True, default=None)

@@ -3,6 +3,8 @@ from .models import Client
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    """ Используется для преобразования данных в объект Client """
+
     password = serializers.CharField(write_only=True)
 
     class Meta:
