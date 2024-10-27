@@ -27,8 +27,6 @@ jobs:
 
       redis:
         image: redis:latest
-        env:
-          REDIS_PASSWORD: my_redis_password
         ports:
           - 6379:6379
         options: >-
@@ -36,9 +34,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --entrypoint sh -c "redis-server --requirepass my_redis_password"
-
-
 
 
     steps:
@@ -61,7 +56,7 @@ jobs:
         DB_NAME: my_database_name
         DB_USER: my_database_user
         DB_PASSWORD: my_database_password
-        REDIS_PASSWORD: my_redis_password
+        REDIS_PASSWORD:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
@@ -73,7 +68,7 @@ jobs:
         DB_NAME: my_database_name
         DB_USER: my_database_user
         DB_PASSWORD: my_database_password
-        REDIS_PASSWORD: my_redis_password
+        REDIS_PASSWORD:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
