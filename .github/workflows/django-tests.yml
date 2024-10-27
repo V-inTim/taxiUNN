@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: my_database_name
+          POSTGRES_USER: my_database_user
+          POSTGRES_PASSWORD: my_database_password
         ports:
           - 5433:5432
         options: >-
@@ -27,8 +27,6 @@ jobs:
 
       redis:
         image: redis:latest
-        env:
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         ports:
           - 6379:6379
         options: >-
@@ -55,10 +53,10 @@ jobs:
 
     - name: Run migrations
       env:
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        DB_NAME: my_database_name
+        DB_USER: my_database_user
+        DB_PASSWORD: my_database_password
+        REDIS_PASSWORD:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
@@ -67,10 +65,10 @@ jobs:
 
     - name: Run tests
       env:
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        DB_NAME: my_database_name
+        DB_USER: my_database_user
+        DB_PASSWORD: my_database_password
+        REDIS_PASSWORD:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
