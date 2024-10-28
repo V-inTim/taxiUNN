@@ -26,12 +26,6 @@ class ClientManager(BaseUserManager):
     def create_superuser(self, email, password):
         """ Создает и возвращает пользователя с привилегиями суперадмина. """
 
-        if email is None:
-            raise TypeError('Clients must have an email address.')
-
-        if password is None:
-            raise TypeError('Superusers must have a password.')
-
         user = self.create_user(email, password)
         user.is_superuser = True
         user.is_staff = True
