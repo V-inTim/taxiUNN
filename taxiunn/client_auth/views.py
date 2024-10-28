@@ -6,6 +6,8 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class RegisterView(APIView):
@@ -60,3 +62,39 @@ class ActivateView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'You have successfully registered.'},
                         status=status.HTTP_200_OK)
+
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if not email or not password:
+            return Response({'error': 'Missing parameters.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, email=email, password=password)
+        if user:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid credentials."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+
+class RefreshView(APIView):
+    def post(self, request):
+        refresh_token = request.data.get('refresh_token')
+
+        if not refresh_token:
+            return Response({'error': 'Missing parameters.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            refresh = RefreshToken(refresh_token)
+            return Response({
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
