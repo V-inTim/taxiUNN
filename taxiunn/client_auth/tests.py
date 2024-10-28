@@ -105,10 +105,10 @@ class RefreshViewTests(APITestCase):
                                                password='1234')
         data = {
             'email': 'test@test.ru',
-            'password': '12345'
+            'password': '1234'
         }
         response = self.client.post(reverse('login'), data, format='json')
-        self.refresh = response.data['access']
+        self.refresh = response.data['refresh']
 
     def test_refresh_client(self):
         data = {
