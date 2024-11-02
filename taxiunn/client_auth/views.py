@@ -57,7 +57,6 @@ class ActivateView(APIView):
         if serializer.is_valid():
             serializer.save()
         else:
-            print("here")
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'You have successfully registered.'},
