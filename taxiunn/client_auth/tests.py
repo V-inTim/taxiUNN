@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.core.cache import cache
+from .models import Client
 
 
 class RegisterViewTests(APITestCase):
@@ -61,5 +62,64 @@ class ActivateViewTests(APITestCase):
         }
 
         response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Missing parameters.')
+
+
+class LoginViewTests(APITestCase):
+    def setUp(self):
+        self.user = Client.objects.create_user(email='test@test.ru',
+                                               password='1234')
+
+    def test_login_client(self):
+        data = {
+            'email': 'test@test.ru',
+            'password': '1234'
+        }
+        response = self.client.post(reverse('login'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+        self.assertIn('refresh', response.data)
+
+    def test_login_client_missing_parameters(self):
+        data = {
+            'email': 'test@test.ru',
+        }
+        response = self.client.post(reverse('login'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Missing parameters.')
+
+    def test_login_client_invalid_credentials(self):
+        data = {
+            'email': 'test@test.ru',
+            'password': '12345'
+        }
+        response = self.client.post(reverse('login'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], "Invalid credentials.")
+
+
+class RefreshViewTests(APITestCase):
+    def setUp(self):
+        self.user = Client.objects.create_user(email='test@test.ru',
+                                               password='1234')
+        data = {
+            'email': 'test@test.ru',
+            'password': '1234'
+        }
+        response = self.client.post(reverse('login'), data, format='json')
+        self.refresh = response.data['refresh']
+
+    def test_refresh_client(self):
+        data = {
+            'refresh_token': self.refresh
+        }
+        response = self.client.post(reverse('refresh'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+    def test_refresh_client_missing_parameters(self):
+        data = {}
+        response = self.client.post(reverse('refresh'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Missing parameters.')
