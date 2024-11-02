@@ -8,8 +8,20 @@ class ClientManager(BaseUserManager):
     класс Manager. .
     """
 
-    def create_user(self, email, password):
-        """ Создает и возвращает пользователя с имэйлом, паролем. """
+    def create_user(self, email: str, password: str):
+        """
+        Создает и возвращает клиента с имэйлом, паролем.
+
+        Args:
+            email (str): почта
+            password (str): пароль
+
+        Raises:
+            TypeError: Если email или password равны None.
+
+        Returns:
+            Client
+        """
 
         if email is None:
             raise TypeError('Clients must have an email address.')
@@ -23,12 +35,24 @@ class ClientManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, password):
-        """ Создает и возвращает пользователя с привилегиями суперадмина. """
+    def create_superuser(self, email: str, password: str):
+        """
+        Создает и возвращает клиента с привилегиями суперадмина.
+
+        Args:
+            email (str): почта
+            password (str): пароль
+
+        Raises:
+            TypeError: Если email или password равны None.
+
+        Returns:
+            Client
+
+        """
 
         user = self.create_user(email, password)
-        user.is_superuser = True
-        user.is_staff = True
+        user.make_superuser()
         user.save()
 
         return user
@@ -61,3 +85,7 @@ class Client(AbstractBaseUser):
     def __str__(self):
         """ Строковое представление модели """
         return self.email
+
+    def make_superuser(self):
+        self.is_staff = True
+        self.is_superuser = True
