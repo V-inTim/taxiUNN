@@ -1,35 +1,41 @@
-import random
 from rest_framework.views import APIView
 from smtplib import SMTPException
-from .serializers import ClientSerializer
+
+from .serializers import (
+    ClientSerializer,
+    PasswordRecoverySerializer,
+    PasswordRecoveryVerifySerializer,
+    PasswordRecoveryChangeSerializer,
+)
+
 from django.core.cache import cache
-from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from .verification import (
+    send_verification_code,
+    make_verification_code,
+    PasswordRecoveryCache,
+)
 
 
 class RegisterView(APIView):
     def post(self, request):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
-            user_data = serializer.validated_data
-            email = user_data['email']
-            code = random.randint(10000, 99999)
+            email = serializer.validated_data['email']
+            code = make_verification_code()
+
             # запись данных в Redis
             cache.set(f'verification_code_{email}', code, timeout=3600)
-            cache.set(f'user_data_{email}', user_data, timeout=3600)
+            cache.set(f'user_data_{email}',
+                      serializer.validated_data, timeout=3600)
 
             # Отправка кода на почту
             try:
-                send_mail(
-                    'TaxiUNN Verification Code',
-                    f'Your verification code is {code}',
-                    'taxi.unn@mail.ru',
-                    [email],
-                    fail_silently=False,
-                )
+                send_verification_code(email=email, verification_code=code)
                 return Response({'message': ('Check your email for '
                                              'the verification code.')},
                                 status=status.HTTP_200_OK)
@@ -97,3 +103,66 @@ class RefreshView(APIView):
         except Exception as e:
             return Response({"error": str(e)},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordRecoveryView(APIView):
+    def post(self, request):
+        serializer = PasswordRecoverySerializer(data=request.data)
+
+        if serializer.is_valid():
+            code = make_verification_code()
+            email = serializer.validated_data['email']
+            # запись данных в Redis
+            PasswordRecoveryCache.save(email=email, code=code)
+
+            # Отправка кода на почту
+            try:
+                send_verification_code(email=email,
+                                       verification_code=code)
+                return Response({'message': ('Check your email for '
+                                'the verification code.')},
+                                status=status.HTTP_200_OK)
+            except SMTPException:
+                return Response({'email': ['The email not found.']},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordRecoveryVerifyView(APIView):
+    def post(self, request):
+        serializer = PasswordRecoveryVerifySerializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            code = serializer.validated_data['verification_code']
+
+            if PasswordRecoveryCache.verify(email=email, code=code):
+                return Response({'message':
+                                'Verification was successful.'},
+                                status=status.HTTP_200_OK)
+            else:
+                return Response({'verification_code':
+                                ['The verification code is not active.']},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordRecoveryChangeView(APIView):
+    def post(self, request):
+        serializer = PasswordRecoveryChangeSerializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+
+            if PasswordRecoveryCache.check(email=email):
+                serializer.save()
+                return Response({'message': 'Password changed.'},
+                                status=status.HTTP_200_OK)
+            else:
+                return Response({'email': ['Try again.']},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
