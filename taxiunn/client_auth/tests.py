@@ -1,5 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 from django.core.cache import cache
 from .models import Client
@@ -37,7 +38,6 @@ class ActivateViewTests(APITestCase):
         }
 
         response = self.client.post(url, data, format='json')
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['message'],
                          'You have successfully registered.')
@@ -123,3 +123,136 @@ class RefreshViewTests(APITestCase):
         response = self.client.post(reverse('refresh'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Missing parameters.')
+
+
+class PasswordRecoveryViewTests(APITestCase):
+    def setUp(self):
+        self.user = Client.objects.create_user(email='test@test.ru',
+                                               password='1234')
+
+    def test_client_password_recovery(self):
+        data = {
+            'email': 'test@test.ru',
+        }
+        response = self.client.post(reverse('password_recovery'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+        self.assertEqual(response.data.get('message'),
+                         "Check your email for the verification code.")
+
+    def test_client_password_recovery_missing_parameters(self):
+        data = {}
+        response = self.client.post(reverse('password_recovery'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data.get('email'),
+            [ErrorDetail(string='This field is required.', code='required')]
+        )
+
+    def test_client_password_recovery_account_not_exist(self):
+        data = {
+            'email': 'test@test1.ru',
+        }
+        response = self.client.post(reverse('password_recovery'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data['email'],
+            [ErrorDetail(string='An account with this email does not exist.',
+                         code='invalid')]
+            )
+
+
+class PasswordRecoveryVerifyViewTests(APITestCase):
+    def setUp(self):
+        self.user = Client.objects.create_user(email='test@test.ru',
+                                               password='1234')
+        self.email = 'test@test.ru'
+        self.code = '34567'
+        cache.set(f'verification_code_{self.email}', self.code, timeout=300)
+
+    def test_client_password_recovery_verify(self):
+        data = {
+            'email': 'test@test.ru',
+            'verification_code': '34567'
+        }
+        response = self.client.post(reverse('password_recovery_verify'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+        self.assertEqual(response.data.get('message'),
+                         'Verification was successful.')
+
+    def test_client_password_recovery_verify_missing_parameters(self):
+        data = {
+            'email': 'test@test.ru',
+        }
+        response = self.client.post(reverse('password_recovery_verify'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data.get('verification_code'),
+            [ErrorDetail(string='This field is required.', code='required')]
+        )
+
+    def test_client_password_recovery_verify_account_not_exist(self):
+        data = {
+            'email': 'test@test1.ru',
+            'verification_code': '34567'
+        }
+        response = self.client.post(reverse('password_recovery_verify'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data['email'],
+            [ErrorDetail(string='An account with this email does not exist.',
+                         code='invalid')]
+        )
+
+
+class PasswordRecoveryChangeViewTests(APITestCase):
+    def setUp(self):
+        self.user = Client.objects.create_user(email='test@test.ru',
+                                               password='1234')
+        self.email = 'test@test.ru'
+        cache.set(f'password_recovery_{self.email}', True, timeout=300)
+
+    def test_client_password_recovery_change(self):
+        data = {
+            'email': 'test@test.ru',
+            'password': '34567',
+        }
+        response = self.client.post(reverse('password_recovery_change'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+        self.assertEqual(response.data.get('message'),
+                         'Password changed.')
+
+    def test_client_password_recovery_change_missing_parameters(self):
+        data = {
+            'email': 'test@test.ru',
+        }
+        response = self.client.post(reverse('password_recovery_change'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data.get('password'),
+            [ErrorDetail(string='This field is required.', code='required')]
+        )
+
+    def test_client_password_recovery_change_account_not_exist(self):
+        data = {
+            'email': 'test@test1.ru',
+            'password': '34567'
+        }
+        response = self.client.post(reverse('password_recovery_change'), data,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data['email'],
+            [ErrorDetail(string='An account with this email does not exist.',
+                         code='invalid')]
+        )
