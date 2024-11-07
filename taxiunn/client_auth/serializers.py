@@ -27,7 +27,7 @@ class PasswordRecoverySerializer(serializers.ModelSerializer):
         model = Client
         fields = ['email']
 
-    def validate_email(self, value):
+    def validate_email(self, value: str):
         # Проверка существования модели с таким email
         if not Client.objects.filter(email=value).exists():
             raise serializers.ValidationError(("An account with "
@@ -46,7 +46,7 @@ class PasswordRecoveryVerifySerializer(PasswordRecoverySerializer):
 
 class PasswordRecoveryChangeSerializer(PasswordRecoverySerializer):
 
-    password = serializers.IntegerField(write_only=True)
+    password = serializers.CharField(write_only=True)
 
     class Meta(PasswordRecoverySerializer.Meta):
         fields = PasswordRecoverySerializer.Meta.fields + ['password']
@@ -56,7 +56,7 @@ class PasswordRecoveryChangeSerializer(PasswordRecoverySerializer):
         password = self.validated_data.get('password')
 
         user = Client.objects.get(email=email)
-        user.set_password(str(password))
+        user.set_password(password)
 
         user.save()
         return user
