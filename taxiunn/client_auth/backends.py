@@ -1,11 +1,13 @@
 from django.contrib.auth.backends import BaseBackend
+
 from .models import Client
 
 
 class ClientBackend(BaseBackend):
-    """ Используется для управления процессом аутентификации клиентов """
+    """Используется для управления процессом аутентификации клиентов."""
 
     def authenticate(self, request, email=None, password=None, **kwargs):
+        """Аутентификация."""
         try:
             user = Client.objects.get(email=email)
         except Client.DoesNotExist:
@@ -16,6 +18,7 @@ class ClientBackend(BaseBackend):
         return None
 
     def get_user(self, user_id):
+        """Получение пользователя."""
         try:
             return Client.objects.get(pk=user_id)
         except Client.DoesNotExist:
