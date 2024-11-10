@@ -1,11 +1,11 @@
-from django.core.mail import send_mail
-from django.core.cache import cache
 import random
+
+from django.core.cache import cache
+from django.core.mail import send_mail
 
 
 def send_verification_code(email: str, verification_code: str):
-    """ Отправляет на email сообщение с code."""
-
+    """Отправляет на email сообщение с code."""
     send_mail(
         'TaxiUNN Verification Code',
         f'Your verification code is {verification_code}',
@@ -15,30 +15,34 @@ def send_verification_code(email: str, verification_code: str):
     )
 
 
-def make_verification_code():
-    """ Создает verification code."""
-
-    return random.randint(10000, 99999)
+def make_verification_code() -> str:
+    """Создает verification code."""
+    return str(random.randint(10000, 99999))
 
 
 class PasswordRecoveryCache:
-    """ Кеш для методов восстановления пароля."""
+    """Кеш для методов восстановления пароля."""
 
     @staticmethod
-    def save(email, code):
-        """ Сохранение в кеш."""
+    def save(email: str, code: str):
+        """Сохранение в кеш."""
         cache.set(f'verification_code_{email}', code, timeout=3600)
 
     @staticmethod
-    def verify(email, code):
-        """ Сранение хранимого и переданного значений."""
+    def verify(email: str, code: str):
+        """Сранение хранимого и переданного значений."""
         stored_code = cache.get(f'verification_code_{email}')
-        if str(code) == str(stored_code):
-            cache.set(f'password_recovery_{email}', True, timeout=300)
-        return str(code) == str(stored_code)
+        is_code_valid: bool = code == stored_code
+        if is_code_valid:
+            cache.set(
+                key=f'password_recovery_{email}',
+                value=True,
+                timeout=300,
+            )
+        return is_code_valid
 
     @staticmethod
-    def check(email):
-        """ Проверка разрешения на изменение пароля."""
+    def check(email: str):
+        """Проверка разрешения на изменение пароля."""
         permission = cache.get(f'password_recovery_{email}')
         return bool(permission)

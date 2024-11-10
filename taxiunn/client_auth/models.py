@@ -1,28 +1,16 @@
-from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
 
 class ClientManager(BaseUserManager):
-    """
+    """Специфика Django.
+
     Django требует, чтобы кастомные пользователи определяли свой собственный
-    класс Manager. .
+    класс Manager.
     """
 
     def create_user(self, email: str, password: str):
-        """
-        Создает и возвращает клиента с имэйлом, паролем.
-
-        Args:
-            email (str): почта
-            password (str): пароль
-
-        Raises:
-            TypeError: Если email или password равны None.
-
-        Returns:
-            Client
-        """
-
+        """Создает и возвращает клиента с имэйлом, паролем."""
         if email is None:
             raise TypeError('Clients must have an email address.')
 
@@ -36,21 +24,7 @@ class ClientManager(BaseUserManager):
         return user
 
     def create_superuser(self, email: str, password: str):
-        """
-        Создает и возвращает клиента с привилегиями суперадмина.
-
-        Args:
-            email (str): почта
-            password (str): пароль
-
-        Raises:
-            TypeError: Если email или password равны None.
-
-        Returns:
-            Client
-
-        """
-
+        """Создает и возвращает клиента с привилегиями суперадмина."""
         user = self.create_user(email, password)
         user.make_superuser()
         user.save()
@@ -59,7 +33,7 @@ class ClientManager(BaseUserManager):
 
 
 class Client(AbstractBaseUser):
-    """ Класс клиента. """
+    """Класс клиента."""
 
     email = models.EmailField(db_index=True, unique=True)
     full_name = models.CharField(null=True, default=None)
@@ -83,9 +57,10 @@ class Client(AbstractBaseUser):
     objects = ClientManager()
 
     def __str__(self):
-        """ Строковое представление модели """
+        """Строковое представление модели."""
         return self.email
 
     def make_superuser(self):
+        """Создание суперпользователя."""
         self.is_staff = True
         self.is_superuser = True
