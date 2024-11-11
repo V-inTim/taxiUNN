@@ -24,7 +24,7 @@ class RegisterViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class ActivateViewTests(APITestCase):
+class RegisterVerifyViewTests(APITestCase):
     """Тесты активации аккаунта."""
 
     def setUp(self):
@@ -37,8 +37,8 @@ class ActivateViewTests(APITestCase):
         cache.set(f'verification_code_{self.email}', self.code, timeout=300)
         cache.set(f'user_data_{self.email}', self.user_data, timeout=300)
 
-    def test_activate_success(self):
-        url = reverse('activate')  # Replace with your actual URL name
+    def test_register_verify_success(self):
+        url = reverse('register_verify')  # Replace with your actual URL name
         data = {
             'email': self.email,
             'verification_code': self.code,
@@ -47,12 +47,12 @@ class ActivateViewTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            response.data['message'],
+            response.data.get('message'),
             'You have successfully registered.',
         )
 
-    def test_activate_invalid_code(self):
-        url = reverse('activate')  # Replace with your actual URL name
+    def test_register_verify_invalid_code(self):
+        url = reverse('register_verify')  # Replace with your actual URL name
         data = {
             'email': self.email,
             'verification_code': '99999',
@@ -61,12 +61,15 @@ class ActivateViewTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data['error'],
-            'Incorrect verification code.',
+            response.data.get('verification_code'),
+            [ErrorDetail(
+                string='Incorrect verification code.',
+                code='invalid',
+            )],
         )
 
-    def test_activate_missing_parameters(self):
-        url = reverse('activate')  # Replace with your actual URL name
+    def test_register_verify_missing_parameters(self):
+        url = reverse('register_verify')  # Replace with your actual URL name
         data = {
             'email': self.email,
             # 'verification_code' is missing
@@ -74,7 +77,10 @@ class ActivateViewTests(APITestCase):
 
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], 'Missing parameters.')
+        self.assertEqual(
+            response.data.get('verification_code'),
+            [ErrorDetail(string='This field is required.', code='required')],
+        )
 
 
 class LoginViewTests(APITestCase):
@@ -102,7 +108,10 @@ class LoginViewTests(APITestCase):
         }
         response = self.client.post(reverse('login'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], 'Missing parameters.')
+        self.assertEqual(
+            response.data.get('password'),
+            [ErrorDetail(string='This field is required.', code='required')],
+        )
 
     def test_login_client_invalid_credentials(self):
         data = {
@@ -111,7 +120,8 @@ class LoginViewTests(APITestCase):
         }
         response = self.client.post(reverse('login'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], "Invalid credentials.")
+        self.assertIn('password', response.data)
+        self.assertEqual(response.data['password'], ["Invalid credentials."])
 
 
 class RefreshViewTests(APITestCase):
@@ -149,7 +159,10 @@ class RefreshViewTests(APITestCase):
         data = {}
         response = self.client.post(reverse('refresh'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], 'Missing parameters.')
+        self.assertEqual(
+            response.data.get('refresh'),
+            [ErrorDetail(string='This field is required.', code='required')],
+        )
 
 
 class PasswordRecoveryViewTests(APITestCase):
