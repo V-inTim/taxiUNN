@@ -20,6 +20,23 @@ def make_verification_code() -> str:
     return str(random.randint(10000, 99999))
 
 
+class RegistrationCache:
+    """Кеш для методов регистрации."""
+
+    @staticmethod
+    def save(email: str, code: str, data: dict):
+        """Сохранение в кеш."""
+        cache.set(f'verification_code_{email}', code, timeout=3600)
+        cache.set(f'user_data_{email}', data, timeout=3600)
+
+    @staticmethod
+    def verify(email: str, code: str) -> dict | None:
+        """Сранение хранимого и переданного значений."""
+        stored_code = cache.get(f'verification_code_{email}')
+        data = cache.get(f'verification_code_{email}')
+        return data if stored_code == code else None
+
+
 class PasswordRecoveryCache:
     """Кеш для методов восстановления пароля."""
 
@@ -29,7 +46,7 @@ class PasswordRecoveryCache:
         cache.set(f'verification_code_{email}', code, timeout=3600)
 
     @staticmethod
-    def verify(email: str, code: str):
+    def verify(email: str, code: str) -> bool:
         """Сранение хранимого и переданного значений."""
         stored_code = cache.get(f'verification_code_{email}')
         is_code_valid: bool = code == stored_code
@@ -42,7 +59,7 @@ class PasswordRecoveryCache:
         return is_code_valid
 
     @staticmethod
-    def check(email: str):
+    def check(email: str) -> bool:
         """Проверка разрешения на изменение пароля."""
         permission = cache.get(f'password_recovery_{email}')
         return bool(permission)
