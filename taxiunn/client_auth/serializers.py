@@ -8,10 +8,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
+    full_name = serializers.CharField(write_only=True)
 
     class Meta:
         model = Client
-        fields = ['email', 'password']
+        fields = ['email', 'password', 'full_name']
 
     def validate_email(self, value: str):
         """Проверка существования модели с таким email."""
@@ -26,6 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = Client.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
+            full_name=validated_data['full_name'],
         )
         return user
 

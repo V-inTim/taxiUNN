@@ -37,7 +37,11 @@ class RegisterView(APIView):
         code = make_verification_code()
 
         # запись данных в Redis
-        RegistrationCache.save(email=email, code=code)
+        RegistrationCache.save(
+            email=email,
+            code=code,
+            data=serializer.validated_data,
+        )
 
         # Отправка кода на почту
         try:
