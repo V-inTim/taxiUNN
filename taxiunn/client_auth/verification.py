@@ -33,7 +33,7 @@ class RegistrationCache:
     def verify(email: str, code: str) -> dict | None:
         """Сранение хранимого и переданного значений."""
         stored_code = cache.get(f'verification_code_{email}')
-        data = cache.get(f'verification_code_{email}')
+        data = cache.get(f'user_data_{email}')
         return data if stored_code == code else None
 
 
