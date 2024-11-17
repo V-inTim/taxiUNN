@@ -1,20 +1,22 @@
 from smtplib import SMTPException
 
 from django.contrib.auth import authenticate
-from django.core.cache import cache
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
-    ClientSerializer,
+    LoginSerializer,
+    RegisterSerializer,
     PasswordRecoveryChangeSerializer,
     PasswordRecoverySerializer,
     PasswordRecoveryVerifySerializer,
+    RegisterVerifySerializer,
 )
 from .verification import (
     PasswordRecoveryCache,
+    RegistrationCache,
     make_verification_code,
     send_verification_code,
 )
@@ -24,7 +26,7 @@ class RegisterView(APIView):
     """View регистрации."""
 
     def post(self, request):
-        serializer = ClientSerializer(data=request.data)
+        serializer = RegisterSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
                 serializer.errors,
@@ -35,11 +37,10 @@ class RegisterView(APIView):
         code = make_verification_code()
 
         # запись данных в Redis
-        cache.set(f'verification_code_{email}', code, timeout=3600)
-        cache.set(
-            f'user_data_{email}',
-            serializer.validated_data,
-            timeout=3600,
+        RegistrationCache.save(
+            email=email,
+            code=code,
+            data=serializer.validated_data,
         )
 
         # Отправка кода на почту
@@ -51,39 +52,34 @@ class RegisterView(APIView):
             )
         except SMTPException:
             return Response(
-                {'error': 'The email not found.'},
+                {'email': ['The email not found.']},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
 
-class ActivateView(APIView):
-    """View активации зарегистрированного аккаунта."""
+class RegisterVerifyView(APIView):
+    """View верификации при регистрации и сохранения аккаунта."""
 
     def post(self, request):
-        data = request.data
-        if "email" not in data or "verification_code" not in data:
-            return Response(
-                {'error': 'Missing parameters.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        user_data = cache.get(f'user_data_{data["email"]}')
-        code = cache.get(f'verification_code_{data["email"]}')
-
-        if str(code) != data["verification_code"]:
-            return Response(
-                {'error': 'Incorrect verification code.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer = ClientSerializer(data=user_data)
-        if serializer.is_valid():
-            serializer.save()
-        else:
+        serializer = RegisterVerifySerializer(data=request.data)
+        if not serializer.is_valid():
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        email = serializer.validated_data['email']
+        code = serializer.validated_data['verification_code']
+
+        data = RegistrationCache.verify(email=email, code=code)
+        if not data:
+            return Response(
+                {'verification_code': ['Incorrect verification code.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = RegisterSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
         return Response(
             {'message': 'You have successfully registered.'},
             status=status.HTTP_200_OK,
@@ -94,13 +90,15 @@ class LoginView(APIView):
     """View авторизации."""
 
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        if not email or not password:
+        serializer = LoginSerializer(data=request.data)
+        if not serializer.is_valid():
             return Response(
-                {'error': 'Missing parameters.'},
+                serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
 
         user = authenticate(request, email=email, password=password)
         if user:
@@ -110,7 +108,7 @@ class LoginView(APIView):
                 status=status.HTTP_200_OK,
             )
         return Response(
-            {"error": "Invalid credentials."},
+            {"password": ["Invalid credentials."]},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -123,7 +121,7 @@ class RefreshView(APIView):
 
         if not refresh_token:
             return Response(
-                {'error': 'Missing parameters.'},
+                {'refresh': ['This field is required.']},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
@@ -132,9 +130,9 @@ class RefreshView(APIView):
                 {'access': str(refresh.access_token)},
                 status=status.HTTP_200_OK,
             )
-        except Exception as exception:
+        except Exception:
             return Response(
-                {"error": str(exception)},
+                {"refresh": ['Refresh code is not active.']},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
