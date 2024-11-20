@@ -6,7 +6,7 @@ from .models import Admin
 class AdminBackend(BaseBackend):
     """Используется для управления процессом аутентификации администраторов."""
 
-    def authenticate(self, request, email=None, password=None, **kwargs):
+    def authenticate(self, request, email: str = None, password: str = None):
         """Аутентификация."""
         try:
             user = Admin.objects.get(email=email)
