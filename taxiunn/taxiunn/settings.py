@@ -144,6 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'client_auth.backends.ClientBackend',
+    'driver_auth.models.DriverBackend',
 ]
 
 

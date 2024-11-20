@@ -7,17 +7,35 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
             name='Driver',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('email', models.EmailField(db_index=True, max_length=254, unique=True)),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID'
+                    )
+                ),
+                ('password', models.CharField(max_length=128,
+                                              verbose_name='password')),
+                (
+                    'last_login',
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name='last login'
+                    )
+                ),
+                (
+                    'email',
+                    models.EmailField(
+                        db_index=True, max_length=254, unique=True
+                    )
+                ),
                 ('full_name', models.CharField(default=None, null=True)),
                 ('is_active', models.BooleanField(default=True)),
                 ('is_stuff', models.BooleanField(default=False)),
@@ -25,7 +43,15 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('tariff', models.CharField(default=None, null=True)),
-                ('rating', models.DecimalField(decimal_places=2, default=None, max_digits=2, null=True)),
+                (
+                    'rating', 
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=None,
+                        max_digits=2,
+                        null=True
+                    )
+                ),
             ],
             options={
                 'abstract': False,
