@@ -14,7 +14,7 @@ from .serializers import (
     PasswordRecoveryVerifySerializer,
     RegisterVerifySerializer,
 )
-from .verification import (
+from taxiunn.verification import (
     PasswordRecoveryCache,
     RegistrationCache,
     make_verification_code,
