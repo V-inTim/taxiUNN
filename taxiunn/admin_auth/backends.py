@@ -1,7 +1,7 @@
 from typing import Optional
 from django.contrib.auth.backends import BaseBackend
 
-from admin_auth.models import Admin
+from .models import Admin
 
 
 class AdminBackend(BaseBackend):
