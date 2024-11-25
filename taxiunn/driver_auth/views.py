@@ -49,7 +49,7 @@ class RegistrationView(APIView):
             )
 
         return Response(
-            {'message': "You\'ve successfully registered!"},
+            {'message': "You've successfully registered!"},
             status=status.HTTP_200_OK,
         )
 
@@ -87,6 +87,6 @@ class VerificationOfRegistrationView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(
-            {'message': "You\'ve successfully registered!"},
+            {'message': "You've successfully registered!"},
             status=status.HTTP_200_OK,
         )

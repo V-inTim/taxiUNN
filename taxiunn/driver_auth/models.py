@@ -3,35 +3,24 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.backends import BaseBackend
 
 
-def validation(func):
-    """Функция-декоратор для валидации данных."""
+class DriverManager(BaseUserManager):
+    """Менеджер для пользователя класса Driver."""
 
-    def wrapper(self, email, password, *args, **kwargs):
-        """Валидация полей email и password."""
+    def create_user(self, email: str, password: str):
+        """Создание обычного пользователя."""
         if email is None:
             raise TypeError('Driver must have an email!')
 
         if password is None:
             raise TypeError('Driver must have a password!')
 
-        return func(self, email, password, *args, **kwargs)
-    return wrapper
-
-
-class DriverManager(BaseUserManager):
-    """Менеджер для пользователя класса Driver."""
-
-    @validation
-    def create_user(self, email, password):
-        """Создание обычного пользователя."""
         user = self.model(email=self.normalize_email(email))
         user.set_password(password)
         user.save()
 
         return user
 
-    @validation
-    def create_superuser(self, email, password):
+    def create_superuser(self, email: str, password: str):
         """Создание суперпользователя."""
         user = self.create_user(email, password)
         user.make_superuser()
@@ -76,7 +65,7 @@ class Driver(AbstractBaseUser):
 
 
 class DriverBackend(BaseBackend):
-    """.Класс для управления процессом аутентификации водителя."""
+    """Класс для управления процессом аутентификации водителя."""
 
     def authenticate(self, request, email=None, password=None, **kwargs):
         """Метод для аутентификации."""
