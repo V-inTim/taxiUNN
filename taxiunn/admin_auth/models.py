@@ -1,6 +1,8 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
+from .models import Admin
+
 
 class AdminManager(BaseUserManager):
     """Специфика Django.
@@ -9,7 +11,7 @@ class AdminManager(BaseUserManager):
     класс Manager.
     """
 
-    def create_user(self, email: str, password: str):
+    def create_user(self, email: str, password: str) -> Admin:
         """Создает и возвращает администратора с имэйлом, паролем."""
         if email is None:
             raise TypeError('Clients must have an email address.')
@@ -23,7 +25,7 @@ class AdminManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email: str, password: str):
+    def create_superuser(self, email: str, password: str) -> Admin:
         """Создает и возвращает администратора с привилегиями суперадмина."""
         user = self.create_user(email, password)
         user.make_superuser()

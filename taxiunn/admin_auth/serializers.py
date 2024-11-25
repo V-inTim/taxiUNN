@@ -13,7 +13,7 @@ class LoginSerializer(serializers.ModelSerializer):
         model = Admin
         fields = ['email', 'password']
 
-    def validate_email(self, value: str):
+    def validate_email(self, value: str) -> str:
         """Проверка существования модели с таким email."""
         if not Admin.objects.filter(email=value).exists():
             raise serializers.ValidationError(
