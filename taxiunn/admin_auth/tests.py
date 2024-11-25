@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework.exceptions import ErrorDetail
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Admin
 
@@ -66,24 +67,15 @@ class RefreshViewTests(APITestCase):
     """Тесты refresh токена."""
 
     def setUp(self):
-        self.user = Admin.objects.create_user(
+        user = Admin.objects.create_user(
             email='test@test.ru',
             password='1234',
         )
-        data = {
-            'email': 'test@test.ru',
-            'password': '1234',
-        }
-        response = self.client.post(
-            reverse('admin_login'),
-            data,
-            format='json',
-        )
-        self.refresh = response.data['refresh']
+        self.refresh = RefreshToken.for_user(user)
 
     def test_refresh_client(self):
         data = {
-            'refresh': self.refresh,
+            'refresh': str(self.refresh),
         }
         response = self.client.post(
             reverse('admin_refresh'),
