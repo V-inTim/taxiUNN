@@ -9,23 +9,29 @@ class AdminManager(BaseUserManager):
     класс Manager.
     """
 
-    def create_user(self, email: str, password: str):
+    def create_user(self, email: str, password: str, full_name: str):
         """Создает и возвращает администратора с имэйлом, паролем."""
         if email is None:
             raise TypeError('Clients must have an email address.')
 
         if password is None:
             raise TypeError('Clients must have a password.')
+        
+        if full_name is None:
+            raise TypeError('Clients must have a full_name.')
 
-        user = self.model(email=self.normalize_email(email))
+        user = self.model(
+            email=self.normalize_email(email),
+            full_name=full_name,
+        )
         user.set_password(password)
         user.save()
 
         return user
 
-    def create_superuser(self, email: str, password: str):
+    def create_superuser(self, email: str, password: str, full_name: str):
         """Создает и возвращает администратора с привилегиями суперадмина."""
-        user = self.create_user(email, password)
+        user = self.create_user(email, password, full_name)
         user.make_superuser()
         user.save()
 

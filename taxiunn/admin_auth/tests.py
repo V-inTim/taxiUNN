@@ -14,12 +14,14 @@ class LoginViewTests(APITestCase):
         self.user = Admin.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name="Tim",
         )
 
     def test_login_admin(self):
         data = {
             'email': 'test@test.ru',
             'password': '1234',
+            'full_name': 'Tim',
         }
         response = self.client.post(
             reverse('admin_login'),
@@ -70,6 +72,7 @@ class RefreshViewTests(APITestCase):
         user = Admin.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name="Tim",
         )
         self.refresh = RefreshToken.for_user(user)
 
