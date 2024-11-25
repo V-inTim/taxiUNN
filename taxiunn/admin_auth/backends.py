@@ -1,4 +1,5 @@
 from typing import Optional
+
 from django.contrib.auth.backends import BaseBackend
 
 from .models import Admin
@@ -7,7 +8,12 @@ from .models import Admin
 class AdminBackend(BaseBackend):
     """Используется для управления процессом аутентификации администраторов."""
 
-    def authenticate(self, email: str, password: str) -> Optional(Admin):
+    def authenticate(
+        self,
+        request,
+        email: str,
+        password: str,
+    ) -> Optional[Admin]:
         """Аутентификация."""
         try:
             user = Admin.objects.get(email=email)
@@ -18,7 +24,7 @@ class AdminBackend(BaseBackend):
             return user
         return None
 
-    def get_user(self, user_id) -> Optional(Admin):
+    def get_user(self, user_id) -> Optional[Admin]:
         """Получение пользователя."""
         try:
             return Admin.objects.get(pk=user_id)
