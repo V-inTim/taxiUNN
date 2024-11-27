@@ -16,7 +16,7 @@ class ClientManager(BaseUserManager):
 
         if password is None:
             raise TypeError('Clients must have a password.')
-        
+
         if full_name is None:
             raise TypeError('Clients must have a full name.')
 
