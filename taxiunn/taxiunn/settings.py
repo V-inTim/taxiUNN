@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "client_auth",
     "driver_auth",
-    
+    "admin_auth",
 ]
 
 MIDDLEWARE = [
@@ -86,7 +86,7 @@ WSGI_APPLICATION = "taxiunn.wsgi.application"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'admin_auth.authentication.AdminJWTAuthentication',
     ),
 }
 
@@ -146,6 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = [
     'client_auth.backends.ClientBackend',
     'driver_auth.models.DriverBackend',
+    'admin_auth.backends.AdminBackend',
 ]
 
 
