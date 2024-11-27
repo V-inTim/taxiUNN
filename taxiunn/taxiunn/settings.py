@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "rest_framework_simplejwt",
     "client_auth",
+    "driver_auth",
     "admin_auth",
 ]
 
@@ -144,6 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'client_auth.backends.ClientBackend',
+    'driver_auth.models.DriverBackend',
     'admin_auth.backends.AdminBackend',
 ]
 
