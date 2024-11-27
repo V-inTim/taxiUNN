@@ -6,23 +6,29 @@ from django.contrib.auth.backends import BaseBackend
 class DriverManager(BaseUserManager):
     """Менеджер для пользователя класса Driver."""
 
-    def create_user(self, email: str, password: str):
+    def create_user(self, full_name: str, email: str, password: str):
         """Создание обычного пользователя."""
+        if full_name is None or full_name == "":
+            raise TypeError('Driver must have a name!')
+
         if email is None:
             raise TypeError('Driver must have an email!')
 
         if password is None:
             raise TypeError('Driver must have a password!')
 
-        user = self.model(email=self.normalize_email(email))
+        user = self.model(
+            full_name=full_name,
+            email=self.normalize_email(email),
+        )
         user.set_password(password)
         user.save()
 
         return user
 
-    def create_superuser(self, email: str, password: str):
+    def create_superuser(self, full_name: str, email: str, password: str):
         """Создание суперпользователя."""
-        user = self.create_user(email, password)
+        user = self.create_user(full_name, email, password)
         user.make_superuser()
         user.save()
 
@@ -63,11 +69,19 @@ class Driver(AbstractBaseUser):
         self.is_staff = True
         self.is_superuser = True
 
+    def fget_full_name(self):
+        """Метод."""
+        return self.full_name
+
+    def fget_short_name(self):
+        """Метод."""
+        return self.full_name.split()[0]
+
 
 class DriverBackend(BaseBackend):
     """Класс для управления процессом аутентификации водителя."""
 
-    def authenticate(self, request, email=None, password=None, **kwargs):
+    def authenticate(self, request, email=None, password=None):
         """Метод для аутентификации."""
         try:
             user = Driver.objects.get(email=email)

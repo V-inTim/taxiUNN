@@ -9,8 +9,9 @@ class DriverRegistrationTests(APITestCase):
 
     def test_incorrect_email(self):
         data = {
-            'email': 'thecoolestdriver&thehood@gmail.com',
+            'email': 'thecoolestdriver@thehood@gmail.com',
             'password': '12345678',
+            'full_name': 'Check',
         }
 
         response = self.client.post(
@@ -19,6 +20,20 @@ class DriverRegistrationTests(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_correct_data(self):
+        data = {
+            'email': 'proba@mail.ru',
+            'password': '12345678',
+            'full_name': 'Lion Alex',
+        }
+
+        response = self.client.post(
+            path=reverse('register'),
+            data=data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class DriverVerificationOfRegistrationTests(APITestCase):
@@ -30,6 +45,7 @@ class DriverVerificationOfRegistrationTests(APITestCase):
         self.user_data = {
             'email': self.email,
             'password': '12345678',
+            'full_name': 'Lion Alex',
         }
 
         cache.set(

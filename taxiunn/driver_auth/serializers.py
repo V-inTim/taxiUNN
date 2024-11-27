@@ -21,16 +21,18 @@ class DriverRegisterSerializer(BaseDriverSerializer):
     """Сериалайзер для регистрации водителя."""
 
     password = serializers.CharField(write_only=True)
+    full_name = serializers.CharField(write_only=True)
 
     class Meta:
         model = Driver
-        fields = ['email', 'password']
+        fields = ['email', 'password', 'full_name']
 
     def create(self, validated_data):
         """Создание объекта класса Driver."""
         user = Driver.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
+            full_name=validated_data['full_name'],
         )
         return user
 
