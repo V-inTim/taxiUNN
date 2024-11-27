@@ -77,6 +77,14 @@ class Driver(AbstractBaseUser):
         """Метод get для взятия короткого имени."""
         return self.full_name.split()[0]
 
+    def fget_data(self) -> dict:
+        """Метод get для взятия свех обязательных данных."""
+        return {
+            'email': self.email,
+            'password': self.password,
+            'full_name': self.full_name,
+        }
+
 
 class DriverBackend(BaseBackend):
     """Класс для управления процессом аутентификации водителя."""
