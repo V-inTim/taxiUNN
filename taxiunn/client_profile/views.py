@@ -20,6 +20,6 @@ class ClientView(APIView):
         user = request.user
         user.delete()
         return Response(
-            {'message': 'User account deleted'},
+            {'message': 'User account deleted.'},
             status=status.HTTP_200_OK,
         )
