@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class AdminAuthConfig(AppConfig):
-    """AdminAuthConfig."""
+class ClientProfileConfig(AppConfig):
+    """AppConfig."""
 
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'admin_auth'
+    name = 'client_profile'

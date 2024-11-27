@@ -6,6 +6,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from taxiunn.verification import (
+    PasswordRecoveryCache,
+    RegistrationCache,
+    make_verification_code,
+    send_verification_code,
+)
 from .serializers import (
     LoginSerializer,
     RegisterSerializer,
@@ -13,12 +19,6 @@ from .serializers import (
     PasswordRecoverySerializer,
     PasswordRecoveryVerifySerializer,
     RegisterVerifySerializer,
-)
-from taxiunn.verification import (
-    PasswordRecoveryCache,
-    RegistrationCache,
-    make_verification_code,
-    send_verification_code,
 )
 
 
@@ -103,6 +103,9 @@ class LoginView(APIView):
         user = authenticate(request, email=email, password=password)
         if user:
             refresh = RefreshToken.for_user(user)
+            refresh.payload.update({    # Полезная информация в самом токене
+                'user_id': user.id,
+            })
             return Response(
                 {'refresh': str(refresh), 'access': str(refresh.access_token)},
                 status=status.HTTP_200_OK,
