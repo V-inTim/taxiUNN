@@ -70,11 +70,11 @@ class Driver(AbstractBaseUser):
         self.is_superuser = True
 
     def fget_full_name(self):
-        """Метод."""
+        """Метод get для взятия полного имени."""
         return self.full_name
 
     def fget_short_name(self):
-        """Метод."""
+        """Метод get для взятия короткого имени."""
         return self.full_name.split()[0]
 
 
