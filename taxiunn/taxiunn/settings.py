@@ -102,10 +102,11 @@ DATABASES = {
         'PORT': '5433',
     }
 }
+REDIS_HOST = env('REDIS_HOST')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/1',
+        'LOCATION': f'redis://{REDIS_HOST}:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'PASSWORD': env('REDIS_PASSWORD'),
