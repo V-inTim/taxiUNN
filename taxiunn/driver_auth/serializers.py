@@ -8,7 +8,7 @@ class BaseDriverSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(write_only=True)
 
-    def validate_email(self, value: str):
+    def validate_email(self, value: str) -> str | None:
         """Валидация email (что пользователь с таким email ещё не создан)."""
         if Driver.objects.filter(email=value).exists():
             raise serializers.ValidationError(
@@ -27,7 +27,7 @@ class DriverRegisterSerializer(BaseDriverSerializer):
         model = Driver
         fields = ['email', 'password', 'full_name']
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> Driver:
         """Создание объекта класса Driver."""
         user = Driver.objects.create_user(
             email=validated_data['email'],
@@ -45,3 +45,22 @@ class DriverVerifyRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = ['email', 'verification_code']
+
+
+class DriverLoginSerializer(serializers.ModelSerializer):
+    """Сериалайзер входа в учётную запись."""
+
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Driver
+        fields = ['email', 'password']
+
+    def validate_email(self, value: str) -> str | None:
+        """Валидация email (что пользователь с таким email существует)."""
+        if not Driver.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "An account with this email does not exist!",
+            )
+        return value
