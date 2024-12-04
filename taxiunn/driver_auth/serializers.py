@@ -1,3 +1,5 @@
+from typing import Optional
+
 from rest_framework import serializers
 
 from .models import Driver
@@ -8,7 +10,7 @@ class BaseDriverSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(write_only=True)
 
-    def validate_email(self, value: str) -> str | None:
+    def validate_email(self, value: str) -> Optional[str]:
         """Валидация email (что пользователь с таким email ещё не создан)."""
         if Driver.objects.filter(email=value).exists():
             raise serializers.ValidationError(
@@ -57,7 +59,7 @@ class DriverLoginSerializer(serializers.ModelSerializer):
         model = Driver
         fields = ['email', 'password']
 
-    def validate_email(self, value: str) -> str | None:
+    def validate_email(self, value: str) -> Optional[str]:
         """Валидация email (что пользователь с таким email существует)."""
         if not Driver.objects.filter(email=value).exists():
             raise serializers.ValidationError(
