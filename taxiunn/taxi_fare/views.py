@@ -1,6 +1,7 @@
 from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     CreateAPIView,
+    ListAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 
@@ -21,6 +22,14 @@ class TaxiFareCreateView(CreateAPIView):
 
 class TaxiFareView(RetrieveUpdateDestroyAPIView):
     """View for retrieve, update and remove taxi fare."""
+
+    queryset = TaxiFare.objects.all()
+    serializer_class = TaxiFareSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class TaxiFareListView(ListAPIView):
+    """View taxi fare list."""
 
     queryset = TaxiFare.objects.all()
     serializer_class = TaxiFareSerializer
