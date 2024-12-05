@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from taxiunn.validation import validate_password
+
 from .models import Client
 
 
@@ -20,6 +22,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "An account with this email exist.",
             )
+        return value
+
+    def validate_password(self, value: str):
+        """Проверка пароля."""
+        validate_password(value)
         return value
 
     def create(self, validated_data):
