@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "client_auth",
     "admin_auth",
+    "taxi_fare",
 ]
 
 MIDDLEWARE = [
