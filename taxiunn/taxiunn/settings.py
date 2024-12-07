@@ -89,6 +89,7 @@ WSGI_APPLICATION = "taxiunn.wsgi.application"
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'client_auth.authentication.ClientJWTAuthentication',
+        'driver_auth.authentication.DriverJWTAuthentication',
         'admin_auth.authentication.AdminJWTAuthentication',
     ),
 }
