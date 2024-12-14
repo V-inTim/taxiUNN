@@ -21,4 +21,6 @@ class IsAuthenticatedAdmin(BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        return isinstance(request.user, Admin)
+        return (
+            isinstance(request.user, Admin) and request.user.is_authenticated
+        )
