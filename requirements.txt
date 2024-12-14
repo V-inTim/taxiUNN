@@ -6,3 +6,5 @@ psycopg2-binary
 django-redis
 django-environ
 wemake-python-styleguide
+geopy
+channels
