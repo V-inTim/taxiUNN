@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "client_profile",
     "driver_auth",
     "admin_auth",
+    "taxi_fare",
 ]
 
 MIDDLEWARE = [
