@@ -3,8 +3,11 @@ flake8
 djangorestframework
 djangorestframework-simplejwt
 psycopg2-binary
+daphne
 django-redis
 django-environ
 wemake-python-styleguide
 geopy
 channels
+channels-redis
+requests
