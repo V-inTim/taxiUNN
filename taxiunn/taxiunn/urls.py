@@ -6,6 +6,7 @@ urlpatterns = [
     path('clients/auth/', include('client_auth.urls')),
     path('clients', include('client_profile.urls')),
     path('drivers/auth/', include('driver_auth.urls')),
+    path('drivers', include('driver_profile.urls')),
     path('admins/auth/', include('admin_auth.urls')),
     path('taxi_fare/', include('taxi_fare.urls')),
 ]

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "client_auth",
     "client_profile",
     "driver_auth",
+    "driver_profile",
     "admin_auth",
     "taxi_fare",
 ]
