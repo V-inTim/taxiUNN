@@ -9,8 +9,16 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 
 import os
 
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+from order_system import routing
+from order_system.authentication import TokenAuthMiddleware
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "taxiunn.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'taxiunn.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": TokenAuthMiddleware(
+        URLRouter(routing.websocket_urlpatterns),
+    ),
+})
