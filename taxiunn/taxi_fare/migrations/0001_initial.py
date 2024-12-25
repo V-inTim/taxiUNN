@@ -2,6 +2,9 @@
 
 from django.db import migrations, models
 
+def add_default_record(apps, schema_editor):
+    TaxiFare = apps.get_model('taxi_fare', 'TaxiFare')
+    TaxiFare.objects.create(name='usual', price='100')
 
 class Migration(migrations.Migration):
 
@@ -19,4 +22,5 @@ class Migration(migrations.Migration):
                 ('price', models.DecimalField(decimal_places=2, max_digits=10)),
             ],
         ),
+        migrations.RunPython(add_default_record),
     ]
