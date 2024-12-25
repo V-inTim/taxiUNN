@@ -14,5 +14,3 @@ RUN pip install -r requirements.txt
 COPY /taxiunn /app/
 
 EXPOSE 8000
-
-# CMD ["python", "taxiunn/manage.py", "runserver", "localhost:8000"]
