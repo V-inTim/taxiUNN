@@ -81,7 +81,7 @@ class ClientConsumer(AsyncWebsocketConsumer):
         if self.is_order_active:
             result = await self.active_order_manager.is_possiple_to_cancel()
             if result:
-                message = {'message_type': MessageType.CANCEL}
+                message = {'message_type': MessageType.CANCEL.value}
                 await self.channel_layer.group_send(
                     self.group_name,
                     {'type': 'chat_message', 'message': message},
@@ -236,8 +236,8 @@ class DriverConsumer(AsyncWebsocketConsumer):
         serializer = AnswerSerializer(data=message_info)
         if serializer.is_valid():
             is_agree = serializer.validated_data['is_agree']
-
-            if is_agree:
+            is_relevance = await self.check_order_relevance()
+            if is_agree and is_relevance:
                 self.is_order_active = True
                 self.inactive_order_manager.remove(self.group_name)
                 await self.channel_layer.group_add(
@@ -262,6 +262,14 @@ class DriverConsumer(AsyncWebsocketConsumer):
                     await self.complete()
         else:
             await self.send_error_message(serializer.errors)
+
+    async def check_order_relevance(self):
+        """Проверка актуальности заказа."""
+        if not self.inactive_order_manager.is_exist(self.group_name):
+            message = {'message_type': MessageType.NOT_CURRENT_ORDER.value}
+            await self.send(text_data=json.dumps(message))
+            return False
+        return True
 
     async def cancel(self):
         """Обработка сообщения отмены заказа."""
@@ -298,6 +306,7 @@ class DriverConsumer(AsyncWebsocketConsumer):
         message_type = message['message_type']
         if message_type == MessageType.CANCEL.value:
             await self.send(text_data=json.dumps(message))
+            await self.complete()
 
     async def disconnect(self, close_code):
         """Автоматически при отсоединении."""
@@ -318,4 +327,3 @@ class DriverConsumer(AsyncWebsocketConsumer):
 
 # FIXME save order in  model
 # get client price
-

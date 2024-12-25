@@ -89,9 +89,16 @@ class InactiveOrderManager:
 
     def free(self, order_id: str):
         """Освободить заказ."""
-        entry = json.loads(self.storage.hget('client_orders', order_id))
-        entry['executor'] = NONE
-        self.storage.hset('client_orders', order_id, json.dumps(entry))
+        json_entry = self.storage.hget('client_orders', order_id)
+        if json_entry:
+            entry = json.loads(json_entry)
+            entry['executor'] = NONE
+            self.storage.hset('client_orders', order_id, json.dumps(entry))
+
+    def is_exist(self, order_id):
+        """Существует ли заказ."""
+        result = self.storage.hget('client_orders', order_id)
+        return bool(result)
 
     def _find_optimal_order(
         self,
