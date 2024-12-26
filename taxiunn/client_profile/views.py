@@ -1,25 +1,32 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
+from client_auth.authentication import (
+    IsAuthenticatedClient,
+    ClientJWTAuthentication,
+)
+from client_auth.models import Client
+
+from .serializers import (
+    UpdateClientSerializer,
+    ReceiveClientSerializer,
+)
 
 
-class ClientView(APIView):
+class ClientView(generics.RetrieveUpdateAPIView):
     """View клиентских данных."""
 
-    permission_classes = [IsAuthenticated]
+    queryset = Client.objects.all()
+    permission_classes = [IsAuthenticatedClient]
+    authentication_classes = [ClientJWTAuthentication]
 
-    def get(self, request):
-        user = request.user
-        return Response(
-            user.get_data(),
-            status=status.HTTP_200_OK,
-        )
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.request.user
+        serializer = ReceiveClientSerializer(instance)
+        return Response(serializer.data)
 
-    def delete(self, request):
-        user = request.user
-        user.delete()
-        return Response(
-            {'message': 'User account deleted.'},
-            status=status.HTTP_200_OK,
-        )
+    def update(self, request, *args, **kwargs):
+        instance = self.request.user
+        serializer = UpdateClientSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)

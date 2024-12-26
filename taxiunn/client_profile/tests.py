@@ -1,56 +1,38 @@
 from django.urls import reverse
-from rest_framework.test import (
-    APITestCase,
-    APIRequestFactory,
-    force_authenticate,
-)
+from rest_framework.test import APITestCase
+
 from client_auth.models import Client
 from rest_framework import status
 
-from .views import ClientView
 
-
-class ClientTests(APITestCase):
-    """Тесты операций с клиентом."""
+class AdminViewTests(APITestCase):
+    """Тесты админских данных."""
 
     def setUp(self):
-        self.factory = APIRequestFactory()
-        self.user = Client.objects.create_user(
-            email='swe@mail.ru',
-            password='rrr',
-            full_name='fff',
+        self.user = Client.objects.create(
+            password="aaaa",
+            email='admin@example.com',
+            full_name='Client User',
         )
-        self.url = reverse('client')
-        self.view = ClientView.as_view()
 
-    def test_get_success(self):
-        request = self.factory.get(self.url, format='json')
-        force_authenticate(request, user=self.user)
-        response = self.view(request)
+        self.client.force_authenticate(user=self.user)
 
+    def test_retrieve_admin(self):
+        url = reverse('client_profile')
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data.get('email'),
-            'swe@mail.ru',
-        )
+        self.assertEqual(response.data['email'], 'admin@example.com')
+        self.assertEqual(response.data['full_name'], 'Client User')
 
-    def test_delete_success(self):
-        request = self.factory.delete(self.url, format='json')
-        force_authenticate(request, user=self.user)
-        response = self.view(request)
-
+    def test_update_admin(self):
+        url = reverse('client_profile')
+        data = {'full_name': 'Updated Client User'}
+        response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data.get('message'),
-            'User account deleted.',
-        )
+        self.assertEqual(response.data['full_name'], 'Updated Client User')
 
-    def test_auth_credentions_not_provided(self):
-        request = self.factory.get(self.url, format='json')
-        response = self.view(request)
-
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(
-            response.data.get('detail'),
-            "Authentication credentials were not provided.",
-        )
+    def test_update_admin_invalid_data(self):
+        url = reverse('client_profile')
+        data = {'full_name': ''}
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
