@@ -4,3 +4,4 @@ venv
 docker-compose.yml
 __pycache__/
 .vscode
+Pipfile
