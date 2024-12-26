@@ -1,121 +1,197 @@
-from django.core.cache import cache
 from django.urls import reverse
+from django.core.cache import cache
+from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.exceptions import ErrorDetail
-from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Admin
+from .models import Driver
 
 
-class LoginViewTests(APITestCase):
-    """Тесты авторизации."""
+class DriverRegistrationTests(APITestCase):
+    """Тестирование регистрации водителя."""
 
-    def setUp(self):
-        self.user = Admin.objects.create_user(
-            email='test@test.ru',
-            password='1234',
-            full_name="Tim",
-        )
-
-    def test_login_admin(self):
+    def test_incorrect_email(self):
         data = {
-            'email': 'test@test.ru',
-            'password': '1234',
-            'full_name': 'Tim',
+            'email': 'thecoolestdriver@thehood@gmail.com',
+            'password': '12345678',
+            'full_name': 'Check',
         }
+
         response = self.client.post(
-            reverse('admin_login'),
-            data,
+            path=reverse('register'),
+            data=data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_correct_data(self):
+        data = {
+            'email': 'proba@mail.ru',
+            'password': '12345678',
+            'full_name': 'Lion Alex',
+        }
+
+        response = self.client.post(
+            path=reverse('register'),
+            data=data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
+
+
+class DriverVerificationOfRegistrationTests(APITestCase):
+    """Тестирование верификации регистрации водителя."""
+
+    def setUp(self):
+        self.email = 'proba@mail.com'
+        self.verification_code = '76543'
+        self.user_data = {
+            'email': self.email,
+            'password': '12345678',
+            'full_name': 'Lion Alex',
+        }
+
+        cache.set(
+            f'verification_code_{self.email}',
+            self.verification_code,
+            timeout=1000,
+        )
+        cache.set(
+            f'user_data_{self.email}',
+            self.user_data,
+            timeout=1000,
+        )
+
+    def test_correct_data(self):
+        response = self.client.post(
+            path=reverse('verify_register'),
+            data={
+                'email': self.email,
+                'verification_code': self.verification_code,
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_incorrect_data(self):
+        response = self.client.post(
+            path=reverse('verify_register'),
+            data={
+                'email': self.email,
+                'verification_code': '78123',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class DriverLoginTests(APITestCase):
+    """Тестирование авторизации водителя."""
+
+    def setUp(self):
+        self.user = Driver.objects.create_user(
+            email='check@check.ru',
+            password='12345678',
+            full_name='Lion Alex',
+        )
+
+    def test_just_login(self):
+        response = self.client.post(
+            path=reverse('login_driver'),
+            data={
+                'email': 'check@check.ru',
+                'password': '12345678',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('refresh', response.data)
-
-    def test_login_admin_missing_parameters(self):
-        data = {
-            'email': 'test@test.ru',
-        }
-        response = self.client.post(
-            reverse('admin_login'),
-            data,
-            format='json',
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.data.get('password'),
-            [ErrorDetail(string='This field is required.', code='required')],
-        )
-
-    def test_login_admin_invalid_credentials(self):
-        data = {
-            'email': 'test@test.ru',
-            'password': '12345',
-        }
-        response = self.client.post(
-            reverse('admin_login'),
-            data,
-            format='json',
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('password', response.data)
-        self.assertEqual(
-            response.data.get('password'),
-            ["Invalid credentials."],
-        )
-
-
-class RefreshViewTests(APITestCase):
-    """Тесты refresh токена."""
-
-    def setUp(self):
-        user = Admin.objects.create_user(
-            email='test@test.ru',
-            password='1234',
-            full_name="Tim",
-        )
-        self.refresh = RefreshToken.for_user(user)
-
-    def test_refresh_client(self):
-        data = {
-            'refresh': str(self.refresh),
-        }
-        response = self.client.post(
-            reverse('admin_refresh'),
-            data,
-            format='json',
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
 
-    def test_refresh_client_missing_parameters(self):
-        data = {}
+    def test_incorrect_password_login(self):
         response = self.client.post(
-            reverse('admin_refresh'),
-            data,
+            path=reverse('login_driver'),
+            data={
+                'email': 'check@check.ru',
+                'password': '87654321',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['password'], 'Incorrect password!')
+
+    def test_incorrect_email_login(self):
+        response = self.client.post(
+            path=reverse('login_driver'),
+            data={
+                'email': '',
+                'password': '12345678',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_missing_field_login(self):
+        response = self.client.post(
+            path=reverse('login_driver'),
+            data={
+                'password': '12345678',
+            },
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.data.get('refresh'),
-            [ErrorDetail(string='This field is required.', code='required')],
+
+
+class DriverRefreshTests(APITestCase):
+    """Тестирование получения refresh-токена."""
+
+    def setUp(self):
+        self.user = Driver.objects.create_user(
+            email='check@check.ru',
+            password='12345678',
+            full_name='Lion Alex',
         )
+        self.refresh_token = RefreshToken.for_user(self.user)
+
+    def test_success_refresh(self):
+        response = self.client.post(
+            path=reverse('refresh_driver'),
+            data={
+                'refresh_token': str(self.refresh_token),
+            },
+            format='json',
+        )
+        self.assertIn('access', response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_refresh_missing_params(self):
+        response = self.client.post(
+            path=reverse('refresh_driver'),
+            data={},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class PasswordRecoveryTests(APITestCase):
+class DriverPasswordRecoveryTests(APITestCase):
     """Тестирование восстановления пароля."""
 
     def setUp(self):
-        self.user = Admin.objects.create_user(
+        self.user = Driver.objects.create_user(
             email="check@check.ru",
             password="12345678",
             full_name="Lion Alex",
         )
 
-    def test_just_password_recovery(self):
+    def test_password_recovery(self):
         response = self.client.post(
-            path=reverse("admin_password_recovery"),
+            path=reverse("recovery_driver"),
             data={
                 "email": "check@check.ru",
             },
@@ -127,18 +203,18 @@ class PasswordRecoveryTests(APITestCase):
             'Check your email for the verification_code.',
         )
 
-    def test_missing_parameters(self):
+    def test_missing_params(self):
         response = self.client.post(
-            path=reverse("admin_password_recovery"),
+            path=reverse("recovery_driver"),
             data={},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("email", response.data)
 
-    def test_this_email_does_not_exist(self):
+    def test_entered_email_does_not_exist(self):
         response = self.client.post(
-            path=reverse("admin_password_recovery"),
+            path=reverse("recovery_driver"),
             data={
                 "email": "check_check@check.ru",
             },
@@ -150,18 +226,18 @@ class PasswordRecoveryTests(APITestCase):
             response.data.get("email"),
             [
                 ErrorDetail(
-                    string='An account with this email does not exist.',
+                    string='An account with this email does not exist!',
                     code='invalid',
                 ),
             ],
         )
 
 
-class PasswordRecoveryVerifyTests(APITestCase):
+class DriverPasswordRecoveryVerifyTests(APITestCase):
     """Тестирование верификации восстановления пароля."""
 
     def setUp(self):
-        self.user = Admin.objects.create_user(
+        self.user = Driver.objects.create_user(
             email="check@check.ru",
             password="12345678",
             full_name="Lion Alex",
@@ -175,9 +251,9 @@ class PasswordRecoveryVerifyTests(APITestCase):
             timeout=1000,
         )
 
-    def test_just_password_recovery_verify(self):
+    def test_password_recovery_verify(self):
         response = self.client.post(
-            path=reverse("admin_password_verify"),
+            path=reverse("recovery_verify_driver"),
             data={
                 "email": self.email,
                 "verification_code": self.verification_code,
@@ -191,9 +267,9 @@ class PasswordRecoveryVerifyTests(APITestCase):
             ['Verification was successful.'],
         )
 
-    def test_missing_parameters(self):
+    def test_missing_params(self):
         response = self.client.post(
-            path=reverse("admin_password_verify"),
+            path=reverse("recovery_verify_driver"),
             data={
                 "email": self.email,
             },
@@ -202,9 +278,9 @@ class PasswordRecoveryVerifyTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("verification_code", response.data)
 
-    def test_invalid_email(self):
+    def test_incorrect_email(self):
         response = self.client.post(
-            path=reverse("admin_password_verify"),
+            path=reverse("recovery_verify_driver"),
             data={
                 "email": "check_check@check.ru",
                 "verification_code": self.verification_code,
@@ -214,9 +290,9 @@ class PasswordRecoveryVerifyTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("email", response.data)
 
-    def test_invalid_verification_code(self):
+    def test_incorrect_verification_code(self):
         response = self.client.post(
-            path=reverse("admin_password_verify"),
+            path=reverse("recovery_verify_driver"),
             data={
                 "email": self.email,
                 "verification_code": "12344",
@@ -231,11 +307,11 @@ class PasswordRecoveryVerifyTests(APITestCase):
         )
 
 
-class PasswordRecoveryChangeTests(APITestCase):
-    """Тестирование смены пароля для администратора."""
+class DriverPasswordRecoveryChangeTests(APITestCase):
+    """Тестирование смены пароля для водителя."""
 
     def setUp(self):
-        self.user = Admin.objects.create_user(
+        self.user = Driver.objects.create_user(
             email="check@check.ru",
             password="12345678",
             full_name="Lion Alex",
@@ -247,9 +323,9 @@ class PasswordRecoveryChangeTests(APITestCase):
             timeout=1000,
         )
 
-    def test_just_change_password(self):
+    def test_change_password(self):
         response = self.client.post(
-            path=reverse("admin_password_change"),
+            path=reverse("recovery_change_driver"),
             data={
                 "email": self.email,
                 "password": "123456789",
@@ -263,9 +339,9 @@ class PasswordRecoveryChangeTests(APITestCase):
             ['Password successfully changed.'],
         )
 
-    def test_missing_parameters(self):
+    def test_missing_params(self):
         response = self.client.post(
-            path=reverse("admin_password_change"),
+            path=reverse("recovery_change_driver"),
             data={
                 "email": self.email,
             },
@@ -274,9 +350,9 @@ class PasswordRecoveryChangeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("password", response.data)
 
-    def test_invalid_email(self):
+    def test_incorrect_email(self):
         response = self.client.post(
-            path=reverse("admin_password_change"),
+            path=reverse("recovery_change_driver"),
             data={
                 "email": "check_check@check.ru",
                 "password": "123456789",
@@ -289,7 +365,7 @@ class PasswordRecoveryChangeTests(APITestCase):
             response.data.get("email"),
             [
                 ErrorDetail(
-                    string='An account with this email does not exist.',
+                    string='An account with this email does not exist!',
                     code='invalid',
                 ),
             ],

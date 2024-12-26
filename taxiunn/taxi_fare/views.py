@@ -3,13 +3,15 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
 )
-from rest_framework.permissions import IsAuthenticated
-
 from .serializers import (
     TaxiFareSerializer,
     TaxiFareCreateSerializer,
 )
 from .models import TaxiFare
+from admin_auth.authentication import (
+    IsAuthenticatedAdmin,
+    AdminJWTAuthentication,
+)
 
 
 class TaxiFareCreateView(CreateAPIView):
@@ -17,7 +19,8 @@ class TaxiFareCreateView(CreateAPIView):
 
     queryset = TaxiFare.objects.all()
     serializer_class = TaxiFareCreateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAdmin]
+    authentication_classes = [AdminJWTAuthentication]
 
 
 class TaxiFareView(RetrieveUpdateDestroyAPIView):
@@ -25,7 +28,8 @@ class TaxiFareView(RetrieveUpdateDestroyAPIView):
 
     queryset = TaxiFare.objects.all()
     serializer_class = TaxiFareSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAdmin]
+    authentication_classes = [AdminJWTAuthentication]
 
 
 class TaxiFareListView(ListAPIView):
@@ -33,4 +37,5 @@ class TaxiFareListView(ListAPIView):
 
     queryset = TaxiFare.objects.all()
     serializer_class = TaxiFareSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAdmin]
+    authentication_classes = [AdminJWTAuthentication]

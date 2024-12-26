@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Client
 
@@ -31,8 +32,9 @@ class RegisterVerifyViewTests(APITestCase):
         self.email = 'proba@mail.ru'
         self.code = '12345'
         self.user_data = {
-            'email': self.email,
+            'email': 'proba@mail.ru',
             'password': '3333',
+            'full_name': 'Tim',
         }
         cache.set(f'verification_code_{self.email}', self.code, timeout=300)
         cache.set(f'user_data_{self.email}', self.user_data, timeout=300)
@@ -90,6 +92,7 @@ class LoginViewTests(APITestCase):
         self.user = Client.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name='Tim',
         )
 
     def test_login_client(self):
@@ -128,24 +131,16 @@ class RefreshViewTests(APITestCase):
     """Тесты refresh токена."""
 
     def setUp(self):
-        self.user = Client.objects.create_user(
+        user = Client.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name='Tim',
         )
-        data = {
-            'email': 'test@test.ru',
-            'password': '1234',
-        }
-        response = self.client.post(
-            reverse('login'),
-            data,
-            format='json',
-        )
-        self.refresh = response.data['refresh']
+        self.refresh = RefreshToken.for_user(user)
 
     def test_refresh_client(self):
         data = {
-            'refresh_token': self.refresh,
+            'refresh_token': str(self.refresh),
         }
         response = self.client.post(
             reverse('refresh'),
@@ -172,6 +167,7 @@ class PasswordRecoveryViewTests(APITestCase):
         self.user = Client.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name='Tim',
         )
 
     def test_client_password_recovery(self):
@@ -229,6 +225,7 @@ class PasswordRecoveryVerifyViewTests(APITestCase):
         self.user = Client.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name='Tim',
         )
         self.email = 'test@test.ru'
         self.code = '34567'
@@ -293,6 +290,7 @@ class PasswordRecoveryChangeViewTests(APITestCase):
         self.user = Client.objects.create_user(
             email='test@test.ru',
             password='1234',
+            full_name='Tim',
         )
         self.email = 'test@test.ru'
         cache.set(
