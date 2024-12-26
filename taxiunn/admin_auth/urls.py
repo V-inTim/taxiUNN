@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    RegisterView,
     LoginView,
     RefreshView,
     PasswordRecoveryView,
@@ -33,5 +34,10 @@ urlpatterns = [
         'password-recovery/change',
         PasswordRecoveryChangeView.as_view(),
         name='admin_password_change',
+    ),
+    path(
+        'register',
+        RegisterView.as_view(),
+        name='admin_register',
     ),
 ]

@@ -12,8 +12,13 @@ from .serializers import (
     PasswordRecoverySerializer,
     AdminPasswordRecoveryVerifySerializer,
     AdminPasswordRecoveryChangeSerializer,
+    RegisterSerializer,
 )
 
+from .models import Admin
+from .password import make_password
+from .message_service import send_password
+from .authentication import AdminJWTAuthentication, IsAuthenticatedAdmin
 from taxiunn.verification import (
     make_verification_code,
     send_verification_code,
@@ -154,6 +159,44 @@ class PasswordRecoveryChangeView(APIView):
             return Response(
                 {'email': ['Something went wrong.']},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class RegisterView(APIView):
+    """View регистрации администратора."""
+
+    permission_classes = [IsAuthenticatedAdmin]
+    authentication_classes = [AdminJWTAuthentication]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            full_name = serializer.validated_data['full_name']
+            password = make_password()
+            try:
+                send_password(
+                    email=email,
+                    password=password,
+                )
+            except SMTPException:
+                return Response(
+                    {'email': ['The email not found.']},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            Admin.objects.create_user(
+                email=email,
+                full_name=full_name,
+                password=password,
+            )
+            return Response(
+                {'message': ['User successfully registered.']},
+                status=status.HTTP_200_OK,
             )
         return Response(
             serializer.errors,
