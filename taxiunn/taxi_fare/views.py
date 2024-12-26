@@ -3,7 +3,6 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
 )
-
 from .serializers import (
     TaxiFareSerializer,
     TaxiFareCreateSerializer,

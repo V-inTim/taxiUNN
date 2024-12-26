@@ -1,11 +1,16 @@
 from django.core.cache import cache
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import (
+    APITestCase,
+    APIRequestFactory,
+    force_authenticate,
+)
 from rest_framework.exceptions import ErrorDetail
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Admin
+from .views import RegisterView
 
 
 class LoginViewTests(APITestCase):
@@ -294,3 +299,36 @@ class PasswordRecoveryChangeTests(APITestCase):
                 ),
             ],
         )
+
+
+class Test(APITestCase):
+    """Tests for TaxiFareView."""
+
+    def setUp(self):
+        self.user = Admin.objects.create_user(
+            email='proba@test.ru',
+            password='test',
+            full_name='Tim Dinner',
+        )
+        self.factory = APIRequestFactory()
+
+        self.url = reverse('admin_register')
+        self.view = RegisterView.as_view()
+
+    def test_repeit_email(self):
+        self.user = Admin.objects.create_user(
+            email='test@test.ru',
+            password='test',
+            full_name='Tim Dinner',
+        )
+        request = self.factory.get(self.url, format='json')
+        data = {
+            'email': 'test@test.ru',
+            'password': 'test',
+            'full_name': 'Tim Dinner',
+        }
+        request = self.factory.post(self.url, data=data, format='json')
+        force_authenticate(request, user=self.user)
+        response = self.view(request)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
