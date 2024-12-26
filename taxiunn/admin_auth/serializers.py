@@ -77,3 +77,22 @@ class AdminPasswordRecoveryChangeSerializer(PasswordRecoverySerializer):
 
         user.save()
         return user
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    """Сериалайзер для регистрации администраторов."""
+
+    email = serializers.EmailField(write_only=True)
+    full_name = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Admin
+        fields = ['email', 'full_name']
+
+    def validate_email(self, value: str) -> str:
+        """Проверка существования модели с таким email."""
+        if Admin.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "An account with this email exist.",
+            )
+        return value
