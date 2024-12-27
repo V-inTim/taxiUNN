@@ -3,6 +3,7 @@ import uuid
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from client_profile.bank_system import check_solvency, withdraw_amount
+from driver_auth.driver_data import get_driver_data
 
 from .serializers import (
     ClientMessageSerializer,
@@ -255,7 +256,12 @@ class DriverConsumer(AsyncWebsocketConsumer):
                     self.group_name,
                     self.channel_name,
                 )
-                message = {'message_type': MessageType.DRIVER_DATA.value}
+                email = self.scope['user']
+                data = await get_driver_data(email)
+                message = {
+                    'message_type': MessageType.DRIVER_DATA.value,
+                    'info': data,
+                }
                 await self.channel_layer.group_send(
                     self.group_name,
                     {'type': 'chat_message', 'message': message},

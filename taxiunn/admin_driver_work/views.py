@@ -25,6 +25,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             email = serializer.validated_data['email']
             password = make_password()
+            print(password)
             try:
                 serializer.save(password)
                 send_password(
