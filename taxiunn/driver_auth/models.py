@@ -2,6 +2,17 @@ from django.db import models
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.backends import BaseBackend
 
+from taxi_fare.models import TaxiFare
+
+
+class Car(models.Model):
+    """Автомобиль."""
+
+    make = models.CharField(null=True, default=None)
+    model = models.CharField(null=True, default=None)
+    color = models.CharField(null=True, default=None)
+    state_number = models.CharField(null=True, default=None)
+
 
 class DriverManager(BaseUserManager):
     """Менеджер для пользователя класса Driver."""
@@ -48,13 +59,13 @@ class Driver(AbstractBaseUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    tariff = models.CharField(null=True, default=None)
-    rating = models.DecimalField(
-        max_digits=2,
-        null=True,
-        default=None,
-        decimal_places=2,
+    fare = models.ForeignKey(
+        TaxiFare,
+        on_delete=models.DO_NOTHING,
+        null=False,
+        default=1,
     )
+    car = models.OneToOneField(Car, on_delete=models.CASCADE, null=True)
 
     USERNAME_FIELD = 'email'
 
