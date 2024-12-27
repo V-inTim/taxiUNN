@@ -48,7 +48,7 @@ class DriverManager(BaseUserManager):
 
 def get_default_fare():
     """Дать дефолтное значение."""
-    TaxiFare.objects.create(pk=1, price='100.00', name='usual')
+    TaxiFare.objects.get_or_create(pk=1, price='100.00', name='usual')
     return 1
 
 
