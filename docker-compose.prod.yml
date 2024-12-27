@@ -24,7 +24,7 @@ services:
       - redis_data:/data
 
   web:
-    build: .
+    image: my_django_app
     container_name: django_container
     command:  bash -c "python taxiunn/manage.py migrate && python taxiunn/manage.py runserver 0.0.0.0:8000"
     ports:
