@@ -60,6 +60,8 @@ jobs:
         DB_HOST: localhost
         REDIS_HOST: localhost
         REDIS_PASSWORD:
+        MAP_URL:
+        MAP_TOKEN:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
@@ -74,6 +76,8 @@ jobs:
         DB_HOST: localhost
         REDIS_HOST: localhost
         REDIS_PASSWORD:
+        MAP_URL:
+        MAP_TOKEN:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       run: |
