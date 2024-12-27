@@ -46,6 +46,12 @@ class DriverManager(BaseUserManager):
         return user
 
 
+def get_default_fare():
+    """Дать дефолтное значение."""
+    TaxiFare.objects.create(pk=1, price='100.00', name='usual')
+    return 1
+
+
 class Driver(AbstractBaseUser):
     """Класс водителя."""
 
@@ -63,7 +69,7 @@ class Driver(AbstractBaseUser):
         TaxiFare,
         on_delete=models.DO_NOTHING,
         null=False,
-        default=1,
+        default=get_default_fare,
     )
     car = models.OneToOneField(Car, on_delete=models.CASCADE, null=True)
 
