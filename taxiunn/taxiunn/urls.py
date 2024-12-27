@@ -9,4 +9,5 @@ urlpatterns = [
     path('admins/auth/', include('admin_auth.urls')),
     path('taxi_fare/', include('taxi_fare.urls')),
     path('admins', include('admin_profile.urls')),
+    path('admins/driver-work/', include('admin_driver_work.urls')),
 ]
