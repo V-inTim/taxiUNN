@@ -2,6 +2,7 @@ import json
 import uuid
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from client_profile.bank_system import check_solvency, withdraw_amount
 
 from .serializers import (
     ClientMessageSerializer,
@@ -54,19 +55,27 @@ class ClientConsumer(AsyncWebsocketConsumer):
             serializer = OrderSerializer(data=message.info)
             if serializer.is_valid():
                 order = Order(**serializer.validated_data)
-                email = self.scope['user']
-                if PriceManager.check(email, order.fare, order.price):
-                    self.inactive_order_manager.add(order, self.group_name)
-                else:
-                    await self.send_error_message(
-                        {'error': ['The order price is not relevant.']},
-                    )
-                    await self.complete()
+                await self.check_order(order)
                 self.inactive_order_manager.add(order, self.group_name)
+                self.price = order.price
             else:
                 await self.send_error_message(serializer.errors)
         elif message.message_type == MessageType.CANCEL.value:
             await self.cancel()
+
+    async def check_order(self, order: Order):
+        """Проверка заказа на актальность."""
+        email = self.scope['user']
+        if not PriceManager.check(email, order.fare, order.price):
+            await self.send_error_message(
+                {'error': ['The order price is not relevant.']},
+            )
+            await self.complete()
+        elif not await check_solvency(email, order.price):
+            await self.send_error_message(
+                {'error': ['You are insolvent.']},
+            )
+            await self.complete()
 
     async def send_error_message(self, errors: dict):
         """Отправить сообщение с ошибками."""
@@ -112,6 +121,8 @@ class ClientConsumer(AsyncWebsocketConsumer):
             )
             await self.send(text_data=json.dumps(message))
             if message_type == MessageType.TRIP_ENDING.value:
+                email = self.scope['user']
+                await withdraw_amount(email, self.price)
                 await self.complete()
 
     async def disconnect(self, close_code):

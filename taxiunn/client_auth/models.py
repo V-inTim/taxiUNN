@@ -54,7 +54,11 @@ class Client(AbstractBaseUser):
     # Временная метка показывающая время последнего обновления объекта.
     updated_at = models.DateTimeField(auto_now=True)
 
-    bank_balance = models.IntegerField(default=1000)
+    bank_balance = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=1000,
+    )
 
     # USERNAME_FIELD - поле, которое используется для входа в систему.
     USERNAME_FIELD = 'email'
